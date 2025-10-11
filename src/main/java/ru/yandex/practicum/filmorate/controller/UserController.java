@@ -100,7 +100,6 @@ public class UserController {
                 if (!newUser.getEmail().contains("@")) {
                     throw new ValidationException("Email должен содержать символ @");
                 }
-
                 oldUser.setEmail(newUser.getEmail());
             }
 
