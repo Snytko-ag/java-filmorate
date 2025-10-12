@@ -77,7 +77,7 @@ public class UserController {
 
             // проверяем необходимые условия
             if (newUser.getId() == 0) {
-                throw new NotFoundException("Id должен быть указан");
+                throw new NotFoundException("Id пользователя должен быть указан");
             }
 
             if (!users.containsKey(newUser.getId())) {

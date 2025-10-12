@@ -71,7 +71,7 @@ public class FilmController {
 
             // проверяем необходимые условия
             if (newFilm.getId() == 0) {
-                throw new NotFoundException("Id должен быть указан");
+                throw new NotFoundException("Id фильма должен быть указан");
             }
 
             log.info("Updating film with id={}", newFilm.getId());
