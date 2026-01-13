@@ -62,6 +62,4 @@ public class UserService {
     public UserStorage getUserStorage() {
         return userStorage;
     }
-
-
 }

@@ -18,6 +18,11 @@ import java.util.List;
 @Slf4j
 public class UserController {
 
+    private static final String USER_ID_PATH = "/{id}";
+    private static final String FRIENDS_PATH = USER_ID_PATH + "/friends";
+    private static final String FRIEND_ID_PATH = FRIENDS_PATH + "/{friendId}";
+    private static final String COMMON_FRIENDS_PATH = FRIENDS_PATH + "/common/{otherId}";
+
     @Autowired
     private final UserStorage userStorage;
     @Autowired
@@ -35,34 +40,31 @@ public class UserController {
 
     @PutMapping
     public User update(@Valid @RequestBody User newUser) {
-
         return userStorage.updateUser(newUser);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(USER_ID_PATH)
     public User getUserById(@PathVariable Integer id) {
         return userStorage.getUserById(id);
     }
 
-    @PutMapping("/{id}/friends/{friendId}")
+    @PutMapping(FRIEND_ID_PATH)
     public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping("/{id}/friends/{friendId}")
+    @DeleteMapping(FRIEND_ID_PATH)
     public void removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.deleteFriend(id, friendId);
     }
 
-    @GetMapping("/{id}/friends")
+    @GetMapping(FRIENDS_PATH)
     public List<User> getFriends(@PathVariable Integer id) {
         return userService.getFriends(id);
     }
 
-    @GetMapping("/{id}/friends/common/{otherId}")
+    @GetMapping(COMMON_FRIENDS_PATH)
     public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getCommonFriends(id, otherId);
     }
-
-
 }

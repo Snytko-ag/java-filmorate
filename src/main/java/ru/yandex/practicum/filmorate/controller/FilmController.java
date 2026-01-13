@@ -18,11 +18,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
 
+    private static final String FILM_ID_PATH = "/{id}";
+    private static final String LIKE_PATH = FILM_ID_PATH + "/like/{userId}";
+    private static final String POPULAR_PATH = "/popular";
+
     @Autowired
     private final FilmStorage filmStorage;
     @Autowired
     private final FilmService filmService;
-
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -31,35 +34,31 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-
         return filmStorage.createFilm(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film newFilm) {
-
         return filmStorage.updateFilm(newFilm);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(FILM_ID_PATH)
     public Film getFilmById(@PathVariable Integer id) {
         return filmStorage.getFilmById(id);
     }
 
-    @GetMapping("/popular")
+    @GetMapping(POPULAR_PATH)
     public List<Film> getPopularMovies(@RequestParam(defaultValue = "10") Integer count) {
         return filmService.getPopularMovies(count);
     }
 
-    @PutMapping("/{id}/like/{userId}")
+    @PutMapping(LIKE_PATH)
     public void likeAMovie(@PathVariable Integer id, @PathVariable Integer userId) {
         filmService.like(id, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
+    @DeleteMapping(LIKE_PATH)
     public void removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
         filmService.dislike(id, userId);
     }
-
-
 }

@@ -4,9 +4,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -16,18 +18,24 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Film {
 
     @PositiveOrZero
-    private Integer id;
+    Integer id;
+
     @NotNull
-    private String name;
+    String name;
+
     @Size(min = 1, max = 200)
-    private String description;
-    private LocalDate releaseDate;
+    String description;
+
+    LocalDate releaseDate;
+
     @Positive
-    private int duration;
-    private Set<Integer> likes  = new HashSet<>();
+    int duration;
+
+    Set<Integer> likes  = new HashSet<>();
 
     public void addLike(Integer userId) {
         likes.add(userId);
