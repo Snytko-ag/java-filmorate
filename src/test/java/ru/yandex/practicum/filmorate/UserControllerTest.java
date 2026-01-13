@@ -1,12 +1,17 @@
+
 package ru.yandex.practicum.filmorate;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,10 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UserControllerTest {
 
     private UserController controller;
+    private final InMemoryUserStorage storage = new InMemoryUserStorage();
+    private UserService service = new UserService(storage);
 
     @BeforeEach
     void setUp() {
-        this.controller = new UserController(); // Создаем реальный экземпляр контроллера
+        this.controller = new UserController(storage, service); // Создаем реальный экземпляр контроллера
     }
 
     @Test
@@ -131,5 +138,21 @@ public class UserControllerTest {
 
     }
 
+    @Test
+    void addFriend_shouldAddFriendToOtherUsersSet() {
+        User user = new User(1, "valid@email.com", "login", "Ivan",
+                LocalDate.of(1980, 1, 1), new HashSet<>());
+        User emptyNameUser = new User(2, "valid2@email.com", "login2", "Petr",
+                LocalDate.of(1985, 1, 1), new HashSet<>());
+        controller.create(user);
+        controller.create(emptyNameUser);
+        controller.addFriend(user.getId(), emptyNameUser.getId());
+
+        Assertions.assertTrue(user.getFriendsQuantity() != 0);
+        Assertions.assertTrue(emptyNameUser.getFriendsQuantity() != 0);
+    }
+
 
 }
+
+

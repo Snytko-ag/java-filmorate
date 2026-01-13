@@ -1,12 +1,23 @@
+
 package ru.yandex.practicum.filmorate;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,9 +26,15 @@ public class FilmControllerTest {
 
     private FilmController controller;
 
+    private final FilmStorage storage = new InMemoryFilmStorage();
+    private final UserStorage userStorage = new InMemoryUserStorage();
+    private final UserService userService = new UserService(userStorage);
+    private final FilmService service = new FilmService(storage, userService);
+
+
     @BeforeEach
     void setUp() {
-        this.controller = new FilmController(); // Создаем реальный экземпляр контроллера
+        this.controller = new FilmController(storage, service); // Создаем реальный экземпляр контроллера
     }
 
     @Test
@@ -133,4 +150,33 @@ public class FilmControllerTest {
         assertEquals(Integer.valueOf(125), filmUpdate.getDuration());
 
     }
+
+    @Test
+    void likeAMovie_whenUserLikesFilm_thenFilmContainsUserLike() {
+        User user = new User(1, "test@ya.ru", "test", "Ivan",
+                LocalDate.of(2008, 8, 25), new HashSet<>());
+        userStorage.createUser(user);
+        Film film = new Film(1, "Film", "FilmTest",
+                LocalDate.of(2026, 1, 2), 120, new HashSet<>());
+        controller.create(film);
+        controller.likeAMovie(film.getId(), user.getId());
+
+        Assertions.assertTrue(film.getLikesNumber() != 0);
+    }
+
+    @Test
+    void getPopularMovies_shouldReturnMostLikedFilmsFirst() {
+        User user = new User(1, "test@ya.ru", "test", "Ivan",
+                LocalDate.of(2008, 8, 25), new HashSet<>());
+        userStorage.createUser(user);
+        Film film = new Film(1, "Film", "FilmTest",
+                LocalDate.of(2026, 1, 2), 120, new HashSet<>());
+        controller.create(film);
+        controller.likeAMovie(film.getId(), user.getId());
+        List<Film> popularMoviesList = service.getPopularMovies(1);
+
+        Assertions.assertEquals(1, popularMoviesList.size());
+    }
 }
+
+
