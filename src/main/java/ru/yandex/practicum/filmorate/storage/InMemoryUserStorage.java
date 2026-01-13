@@ -19,6 +19,7 @@ import static java.lang.String.format;
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users;
+
     public InMemoryUserStorage() {
         users = new HashMap<>();
     }
