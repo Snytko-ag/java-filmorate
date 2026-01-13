@@ -40,9 +40,7 @@ public class UserService {
     public List<User> getFriends(Integer userId) {
         User user = userStorage.getUserById(userId);
         Set<Integer> friends = user.getFriends();
-        if (friends.isEmpty()) {
-            throw new NotFoundException(format("Пользователь с id=%d не найден", userId));
-        }
+
         return friends.stream()
                 .map(userStorage::getUserById)
                 .collect(Collectors.toList());
