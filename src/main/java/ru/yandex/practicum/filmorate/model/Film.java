@@ -1,9 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import java.util.LinkedHashSet;
@@ -23,7 +20,7 @@ public class Film {
     @PositiveOrZero
     Integer id;
 
-    @NotNull
+    @NotBlank
     String name;
     @Size(min = 1, max = 200)
     String description;
@@ -31,8 +28,8 @@ public class Film {
     @Positive
     int duration;
     @NotNull
-    private Mpa mpa;
-    private Set<Genre> genres = new LinkedHashSet<>();
+    Mpa mpa;
+    Set<Genre> genres = new LinkedHashSet<>();
     Set<Integer> likes  = new HashSet<>();
 
 
