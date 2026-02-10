@@ -1,50 +1,87 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeDbStorage;
 
-import java.util.Comparator;
+
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static java.lang.String.format;
+import java.util.Set;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserService userService;
+    private final LikeDbStorage likeDbStorage;
+    private final GenreDbStorage genreDbStorage;
 
-    public void like(Integer filmId, Integer userId) {
-        Film film = filmStorage.getFilmById(filmId);
-        userService.getUserStorage().getUserById(userId);
-        if (film == null) {
-            throw new NotFoundException(format("Пользователь с id=%d не найден", filmId));
-        }
-        film.addLike(userId);
-        log.info("'{}' liked a movie '{}'", userId, filmId);
+    @Autowired
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
+                       UserService userService,
+                       LikeDbStorage likeDbStorage,
+                       GenreDbStorage genreDbStorage) {
+        this.filmStorage = filmStorage;
+        this.userService = userService;
+        this.likeDbStorage = likeDbStorage;
+        this.genreDbStorage = genreDbStorage;
     }
 
-    public void dislike(Integer filmId, Integer userId) {
-        Film film = filmStorage.getFilmById(filmId);
+    public void like(Integer filmId, Integer userId) {
+        log.debug("Пользователь {} ставит лайк фильму {}", userId, filmId);
+
+        // 1. Проверяем существование пользователя
         userService.getUserStorage().getUserById(userId);
-        if (film == null) {
-            throw new NotFoundException(format("Пользователь с id=%d не найден", filmId));
-        }
-        film.removeLike(userId);
-        log.info("'{}' disliked a movie '{}'", userId, filmId);
+
+        // 2. Проверяем существование фильма
+        filmStorage.getFilmById(filmId);
+
+        // 3. Используем LikeDbStorage для сохранения в БД
+        likeDbStorage.like(filmId, userId);
+
+        log.info("Пользователь '{}' поставил лайк фильму '{}'", userId, filmId);
+    }
+
+
+    public void dislike(Integer filmId, Integer userId) {
+        log.debug("Пользователь {} удаляет лайк у фильма {}", userId, filmId);
+
+        // Проверяем существование пользователя
+        userService.getUserStorage().getUserById(userId);
+
+        // Проверяем существование фильма
+        filmStorage.getFilmById(filmId);
+
+        // Используем LikeDbStorage для удаления из БД
+        likeDbStorage.dislike(filmId, userId);
+
+        log.info("Пользователь '{}' удалил лайк у фильма '{}'", userId, filmId);
     }
 
     public List<Film> getPopularMovies(int count) {
-        log.info("Attempt to get the most liked movies list");
-        return filmStorage.findAll().stream()
-                .sorted(Comparator.comparingInt(Film::getLikesNumber).reversed())
-                .limit(count).collect(Collectors.toList());
+        log.info("Получение {} популярных фильмов", count);
+
+        // Если у вас есть метод getPopularFilms в LikeDbStorage
+        List<Film> films = likeDbStorage.getPopularFilms(count);
+
+        // Загружаем жанры для каждого фильма
+        films.forEach(film -> {
+            Set<Genre> genres = genreDbStorage.getGenresByFilmId(film.getId());
+            film.setGenres(genres);
+
+            // Загружаем лайки
+            Set<Integer> likes = likeDbStorage.getLikesByFilmId(film.getId());
+            film.setLikes(likes);
+        });
+
+        return films;
     }
 }

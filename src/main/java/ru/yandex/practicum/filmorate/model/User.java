@@ -4,10 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
@@ -18,6 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class User {
 
     @PositiveOrZero
@@ -35,6 +33,9 @@ public class User {
     LocalDate birthday;
 
     Set<Integer> friends  = new HashSet<>();
+
+    public User(String mail, String flyingDragon, String andrew, LocalDate of) {
+    }
 
     public void addFriend(Integer id) {
         friends.add(id);
