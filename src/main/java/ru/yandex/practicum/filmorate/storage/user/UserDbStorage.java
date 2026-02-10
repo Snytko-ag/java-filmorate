@@ -25,7 +25,7 @@ import static java.lang.String.format;
 @Slf4j
 @Component("UserDbStorage")
 @RequiredArgsConstructor
-public class UserDbStorage implements UserStorage{
+public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final UserMapper userMapper;
