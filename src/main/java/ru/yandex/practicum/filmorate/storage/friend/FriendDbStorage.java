@@ -46,7 +46,7 @@ public class FriendDbStorage {
         String checkSql = "SELECT COUNT(*) FROM friends WHERE user_id = ? AND friend_id = ?";
         Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, userId, friendId);
 
-        if ( count > 0) {
+        if (count > 0) {
             throw new ValidationException("Пользователь уже в друзьях");
         }
 
@@ -55,7 +55,7 @@ public class FriendDbStorage {
         Integer reverseCount = jdbcTemplate.queryForObject(reverseCheckSql, Integer.class, friendId, userId);
 
         // Определяем статус (безопасная проверка)
-        boolean status = ( reverseCount > 0);
+        boolean status = (reverseCount > 0);
 
         // Добавляем запись о дружбе
         String insertSql = "INSERT INTO friends (user_id, friend_id, status) VALUES (?, ?, ?)";
