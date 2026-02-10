@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import java.util.*;
 import static java.lang.String.format;
 
 @Slf4j
-@Component
+@Component("InMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Integer, Film> films;
@@ -63,6 +63,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void deleteFilms() {
         films.clear();
         log.info("Movie storage is empty now");
+    }
+
+    @Override
+    public Film deleteFilmsById(Integer id) {
+        if (id == null) {
+            throw new ValidationException("Передан пустой аргумент!");
+        }
+        if (!films.containsKey(id)) {
+            throw new NotFoundException(format("Фильм с id=%d не найден", id));
+        }
+        return films.remove(id);
     }
 
     @Override

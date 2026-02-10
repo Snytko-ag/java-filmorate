@@ -1,13 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,17 +16,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/films")
 @Slf4j
-@RequiredArgsConstructor
 public class FilmController {
 
     private static final String FILM_ID_PATH = "/{id}";
     private static final String LIKE_PATH = FILM_ID_PATH + "/like/{userId}";
     private static final String POPULAR_PATH = "/popular";
 
-    @Autowired
+
     private final FilmStorage filmStorage;
-    @Autowired
     private final FilmService filmService;
+
+    @Autowired
+    public FilmController(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
+                          FilmService filmService) {
+        this.filmStorage = filmStorage;
+        this.filmService = filmService;
+    }
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -45,6 +51,19 @@ public class FilmController {
     @GetMapping(FILM_ID_PATH)
     public Film getFilmById(@PathVariable Integer id) {
         return filmStorage.getFilmById(id);
+    }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAllFilms() {
+        filmStorage.deleteFilms();
+        log.info("Все фильмы удалены");
+    }
+
+    @DeleteMapping("/{id}")
+    public Film delete(@PathVariable Integer id) {
+        log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
+        return filmStorage.deleteFilmsById(id);
     }
 
     @GetMapping(POPULAR_PATH)
